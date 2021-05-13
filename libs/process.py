@@ -121,7 +121,7 @@ def process(input_dir, output_dir, parser_names, use_bnb, in_currency=False):
         if in_currency:
             logger.info(f"Profit/Loss: {win_loss_in_currency} USD.")
 
-        logger.info(f"Profit/Loss: {win_loss} lev.")
+        logger.info(f"Profit/Loss: {win_loss} eur.")
 
     if len(unsupported_activity_types) > 0:
         logger.warning(f"Statements contain unsupported activity types: {unsupported_activity_types}. Only dividends related data was calculated.")

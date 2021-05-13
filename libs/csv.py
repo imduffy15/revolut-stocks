@@ -58,7 +58,7 @@ def export_app8_part1(file_path, purchases):
                             "count": str(count),
                             "acquire_date": purchase["trade_date"].strftime(NAP_DATE_FORMAT),
                             "purchase_price_in_currency": purchase["price_in_currency"],
-                            "purchase_price_in_lev": purchase["price"],
+                            "purchase_price_in_eur": purchase["price"],
                         },
                     }
                 )
@@ -66,7 +66,7 @@ def export_app8_part1(file_path, purchases):
     export_to_csv(
         export_purchases,
         file_path,
-        ["stock_symbol", "count", "acquire_date", "purchase_price_in_currency", "purchase_price_in_lev"],
+        ["stock_symbol", "count", "acquire_date", "purchase_price_in_currency", "purchase_price_in_eur"],
     )
 
 

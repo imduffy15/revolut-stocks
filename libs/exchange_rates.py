@@ -1,8 +1,7 @@
 from io import StringIO
 import csv
+import requests
 from dateutil.relativedelta import relativedelta
-import urllib.request
-from urllib.parse import urlencode
 from datetime import datetime, timedelta
 import json
 import os
@@ -13,66 +12,26 @@ logger = logging.getLogger("exchange_rates")
 
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
-from libs import BNB_BASE_URL, BNB_DATE_FORMAT, BNB_SPLIT_BY_MONTHS, BNB_CSV_HEADER_ROWS
-from libs.cached_exchange_rates import load_exchange_rates
+from libs import EXCHANGE_RATES_BASE_URL
 
 
-def query_exchange_rates(first_date, last_date):
-    logger.debug(f"Obtaining exchange rate from date range: [{first_date}] - [{last_date}]")
+def query_exchange_rates(date):
+    logger.debug(f"Obtaining exchange rate for {date}")
 
-    params = {
-        "downloadOper": "true",
-        "group1": "second",
-        "valutes": "USD",
-        "search": "true",
-        "showChart": "false",
-        "showChartButton": "false",
-        "type": "CSV",
-    }
-
-    params["periodStartDays"] = "{:02d}".format(first_date.day)
-    params["periodStartMonths"] = "{:02d}".format(first_date.month)
-    params["periodStartYear"] = first_date.year
-
-    params["periodEndDays"] = "{:02d}".format(last_date.day)
-    params["periodEndMonths"] = "{:02d}".format(last_date.month)
-    params["periodEndYear"] = last_date.year
-
-    exchange_rates = {}
     try:
-        response = urllib.request.urlopen(BNB_BASE_URL + urlencode(params))
-
-        data = response.read()
-        text = data.decode("utf-8")
-
-        fd = StringIO(text)
-
-        reader = csv.reader(fd, delimiter=",")
-
-        for index, row in enumerate(reader):
-            if index < BNB_CSV_HEADER_ROWS:
-                continue
-
-            if not row:
-                continue
-
-            date = datetime.strptime(row[0], BNB_DATE_FORMAT)
-            exchange_rates[date] = decimal.Decimal(row[3].strip())
+        resp = requests.get(EXCHANGE_RATES_BASE_URL + date.strftime("%Y-%m-%d"), params={"base":"USD", "symbols": "EUR"}).json()
+        return { date: decimal.Decimal(resp['rates']['EUR']) }
     except Exception:
-        logging.exception(f"Unable to get exchange rate from BNB. Please, try again later.")
+        logging.exception(f"Unable to get exchange rates. Please, try again later.")
         raise SystemExit(1)
-
-    return exchange_rates
-
 
 def get_exchange_rates(first_date, last_date):
     first_date -= relativedelta(months=1)  # Get one extra month of data to ensure there was a published exchange rate
     exchange_rates = {}
     while True:
         curr_fs_date = first_date
-        curr_ls_date = first_date + relativedelta(months=BNB_SPLIT_BY_MONTHS)
-        exchange_rates.update(query_exchange_rates(curr_fs_date, curr_ls_date))
-        first_date = curr_ls_date + relativedelta(days=1)
+        exchange_rates.update(query_exchange_rates(curr_fs_date))
+        first_date = curr_fs_date + relativedelta(days=1)
 
         if first_date > last_date:
             break
@@ -89,10 +48,7 @@ def populate_exchange_rates(statements, use_bnb):
     last_date = statements[-1]["trade_date"]
 
     exchange_rates = {}
-    if use_bnb:
-        exchange_rates = get_exchange_rates(first_date, last_date)
-    else:
-        exchange_rates = load_exchange_rates()
+    exchange_rates = get_exchange_rates(first_date, last_date)
 
     for statement in statements:
         if statement["trade_date"] in exchange_rates:

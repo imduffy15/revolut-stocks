@@ -1,8 +1,6 @@
-BNB_BASE_URL = "https://www.bnb.bg/Statistics/StExternalSector/StExchangeRates/StERForeignCurrencies/index.htm?"
+EXCHANGE_RATES_BASE_URL = "https://api.ratesapi.io/api/"
 
-BNB_DATE_FORMAT = "%d.%m.%Y"
-BNB_SPLIT_BY_MONTHS = 3
-BNB_CSV_HEADER_ROWS = 2
+BNB_DATE_FORMAT = "%Y-%m-%d"
 
 NAP_DIGIT_PRECISION = "0.01"
 NAP_DATE_FORMAT = "%Y-%m-%d"

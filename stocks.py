@@ -27,10 +27,10 @@ parser.add_argument("-v", dest="verbose", help="Enable verbose output.", action=
 parsed_args = parser.parse_args()
 
 if parsed_args.verbose:
-    logging.getLogger("calculations").setLevel(level=logging.DEBUG)
+    # logging.getLogger("calculations").setLevel(level=logging.DEBUG)
     logging.getLogger("exchange_rates").setLevel(level=logging.DEBUG)
-    logging.getLogger("parsers").setLevel(level=logging.DEBUG)
-    logging.getLogger("process").setLevel(level=logging.DEBUG)
+    # logging.getLogger("parsers").setLevel(level=logging.DEBUG)
+    # logging.getLogger("process").setLevel(level=logging.DEBUG)
 
 
 def main():
