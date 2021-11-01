@@ -36,7 +36,7 @@ if parsed_args.verbose:
 def main():
     parsers = parsed_args.parsers
     if parsers is None:
-        parsers = ["revolut"]
+        parsers = ["csv"]
 
     process(
         parsed_args.input_dir,

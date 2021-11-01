@@ -93,7 +93,7 @@ def calculate_sales(statements):
             logger.debug(f"AVG price: [{avg_purchase_price}]")
 
             purchase_price = avg_purchase_price * activity_quantity
-            sell_price = statement["amount"] * statement["exchange_rate"]
+            sell_price = statement["amount"] / statement["exchange_rate"]
 
             purchase_price_in_currency = avg_purchase_price_in_currency * activity_quantity
             sell_price_in_currency = statement["amount"]
@@ -192,7 +192,7 @@ def calculate_remaining_purchases(purchases):
                     **purchase,
                     **{
                         "price_in_currency": (purchase["price"] * purchase["quantity"]).quantize(decimal.Decimal(NAP_DIGIT_PRECISION)),
-                        "price": (purchase["price"] * purchase["exchange_rate"] * purchase["quantity"]).quantize(
+                        "price": (purchase["price"] / purchase["exchange_rate"] * purchase["quantity"]).quantize(
                             decimal.Decimal(NAP_DIGIT_PRECISION)
                         ),
                     },

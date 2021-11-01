@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime, timedelta
+from dateutil.parser import parse
 import logging
 import decimal
 
@@ -20,19 +21,12 @@ CSV_DATE_FORMATS = [
     "%Y/%m/%d",
 ]
 CSV_ACTIVITY_TYPES = ["SELL", "SELL CANCEL", "BUY", "SSP", "SSO", "MAS", "SC"] + RECEIVED_DIVIDEND_ACTIVITY_TYPES + TAX_DIVIDEND_ACTIVITY_TYPES
-CSV_REQUIRED_COLUMNS = ["trade_date", "activity_type", "company", "symbol", "quantity", "price", "amount", "symbol_description"]
+CSV_REQUIRED_COLUMNS = ["date", "type", "ticker", "currency", "quantity", "price_per_share", "total_amount"]
 
 
 class Parser(StatementFilesParser):
     def parse_date(self, date_string):
-        for date_format in CSV_DATE_FORMATS:
-            try:
-                return datetime.strptime(date_string, date_format)
-            except ValueError:
-                pass
-
-        logger.error(f"Unable to parse date: [{date_string}].")
-        raise SystemExit(1)
+      return parse(date_string)
 
     def clean_number(self, number_string):
         return number_string.replace("(", "").replace(")", "").replace(",", "")
@@ -62,18 +56,18 @@ class Parser(StatementFilesParser):
             if not row:
                 continue
 
-            if row[headers["activity_type"]] in CSV_ACTIVITY_TYPES:
+            if row[headers["type"]] in CSV_ACTIVITY_TYPES:
                 activity = {
-                    "trade_date": self.parse_date(row[headers["trade_date"]]),
-                    "settle_date": "-",
-                    "currency": "USD",
-                    "activity_type": row[headers["activity_type"]],
-                    "symbol": row[headers["symbol"]],
-                    "company": row[headers["company"]],
-                    "symbol_description": row[headers["symbol_description"]],
+                    "trade_date": self.parse_date(row[headers["date"]]),
+                    "settle_date": self.parse_date(row[headers["date"]]),
+                    "currency": row[headers["currency"]],
+                    "activity_type": row[headers["type"]],
+                    "symbol": row[headers["ticker"]],
+                    "company": row[headers["ticker"]],
+                    "symbol_description": row[headers["ticker"]],
                     "quantity": decimal.Decimal(self.clean_number(row[headers["quantity"]])),
-                    "price": decimal.Decimal(self.clean_number(row[headers["price"]])),
-                    "amount": decimal.Decimal(self.clean_number(row[headers["amount"]])),
+                    "price": decimal.Decimal(self.clean_number(row[headers["price_per_share"]])),
+                    "amount": decimal.Decimal(self.clean_number(row[headers["total_amount"]])),
                 }
 
                 activities.append(activity)

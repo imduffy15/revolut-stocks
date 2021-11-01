@@ -16,11 +16,9 @@ logger = logging.getLogger("process")
 supported_parsers = {}
 
 if getattr(sys, "frozen", False):
-    import libs.parsers.revolut as revolut
-    import libs.parsers.trading212 as trading212
     import libs.parsers.csv as csv
 
-    supported_parsers = {"revolut": revolut.Parser, "trading212": trading212.Parser, "csv": csv.Parser}
+    supported_parsers = {"csv": csv.Parser}
 else:
     parser_modules = [mod.name for mod in iter_modules(libs.parsers.__path__, "libs.parsers.")]
     for parser_module in parser_modules:
@@ -74,7 +72,7 @@ def process(input_dir, output_dir, parser_names, use_bnb, in_currency=False):
     )
 
     logger.info(f"Populating exchange rates.")
-    for_each_parser(populate_exchange_rates, statements, use_bnb=use_bnb)
+    for_each_parser(populate_exchange_rates, statements)
 
     logger.info(f"Calculating dividends information.")
     dividends = for_each_parser(calculate_dividends, statements)

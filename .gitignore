@@ -135,3 +135,10 @@ get_exchange_rates.py
 
 #VS code
 .vscode
+
+*statements*
+*.zip
+*workings*
+*output*
+
+
